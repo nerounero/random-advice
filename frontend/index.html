@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>奇妙な助言</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap');
+
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Kosugi Maru', sans-serif;
+        }
+
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        #advice {
+            font-size: 1.2em;
+            color: #555;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .message {
+            color: #d9534f;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            /* Light grey */
+            border-top: 4px solid #3498db;
+            /* Blue */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        .more-btn,
+        .info-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: #fff;
+            transition: background-color 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .more-btn:hover,
+        .info-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .info-btn {
+            background-color: #999;
+        }
+
+        .info-btn:hover {
+            background-color: #888;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1em;
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>奇妙な助言</h1>
+        <div class="spinner" id="spinner"></div>
+        <div id="advice" style="display: none;"></div>
+        <div id="message" class="message"></div>
+        <div class="buttons">
+            <button class="more-btn" id="moreBtn">もう一個!!</button>
+            <button class="info-btn" id="infoBtn">これはなに？</button>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>このサイトについて</h2>
+            <p>このサイトはGPTが“ちょっと変わった”アドバイスをくれるよ。<br>お金ないから呼び出し制限が厳しめだよ!!</p>
+        </div>
+    </div>
+
+    <script>
+        function fetchAdvice() {
+            const adviceElement = document.getElementById('advice');
+            const messageElement = document.getElementById('message');
+            const spinnerElement = document.getElementById('spinner');
+
+            // スピナーを表示し、アドバイスエリアとメッセージエリアを隠す
+            spinnerElement.style.display = 'block';
+            adviceElement.style.display = 'none';
+            messageElement.innerText = '';
+
+            fetch('https://advice.nenenenene.xyz/random-advice')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('ネットワークエラーが発生しました。');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    adviceElement.innerText = data.advice;
+                    adviceElement.style.display = 'inline-block';
+                    spinnerElement.style.display = 'none';
+                })
+                .catch(error => {
+                    console.error('エラー:', error);
+                    adviceElement.style.display = 'none';
+                    messageElement.innerText = '助言を取得できませんでした。';
+                    spinnerElement.style.display = 'none';
+                });
+        }
+
+        // ページが読み込まれたときに助言を取得する
+        document.addEventListener('DOMContentLoaded', fetchAdvice);
+
+        // 「もう一個!!」ボタンがクリックされたときの処理
+        document.getElementById('moreBtn').addEventListener('click', fetchAdvice);
+
+        // モーダルの表示/非表示
+        var modal = document.getElementById('myModal');
+        var infoBtn = document.getElementById('infoBtn');
+        var closeBtn = document.getElementsByClassName('close')[0];
+
+        infoBtn.onclick = function () {
+            modal.style.display = 'block';
+        }
+
+        closeBtn.onclick = function () {
+            modal.style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>
